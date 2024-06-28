@@ -2,6 +2,8 @@
 
     pip install pytelegrambotapi
 
+https://pytba.readthedocs.io/ru/latest/quick_start.html#synchronous-telebot
+
 https://www.gitbook.com/book/groosha/telegram-bot-lessons/details
 
 ## Token encrypt
