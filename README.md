@@ -1,6 +1,7 @@
 # py_bots
 
     pip install pytelegrambotapi
+    pip install psutil
 
 https://pytba.readthedocs.io/ru/latest/quick_start.html#synchronous-telebot
 
