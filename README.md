@@ -24,6 +24,10 @@ openssl enc -k NIKA_HELP_PHRASE  -aes256 -base64 -d -in token.enc -out .token
 
 ```
 
+## Data
+
+- admin: 319597195
+
 ## Очистка истории git
 
 В историю были закомичены секреты, пришлось почистить по инструкции которая ниже
