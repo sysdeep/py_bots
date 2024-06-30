@@ -28,6 +28,20 @@ openssl enc -k NIKA_HELP_PHRASE  -aes256 -base64 -d -in token.enc -out .token
 
 - admin: 319597195
 
+## Docker
+
+build
+
+```bash
+docker build . -t sysdeep_bot:0.1
+```
+
+run
+
+```bash
+docker run -it -e TOKEN=$(cat .token) --restart unless-stopped --name sysdeep_bot -d sysdeep_bot:0.1
+```
+
 ## Очистка истории git
 
 В историю были закомичены секреты, пришлось почистить по инструкции которая ниже
