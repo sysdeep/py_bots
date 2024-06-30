@@ -3,13 +3,17 @@
 example echo bot
 """
 import logging
-from pathlib import Path
 
 import telebot
 
+from app.handlers.echo_handler import EchoHandler
 from app.logger.logger_configurator import LoggerConfigurator
 from app.services.health_service.health_service import HealthService
 from app.settings.application_settings_reader import ApplicationSettingsReader
+
+# from pathlib import Path
+
+
 
 # BOT_TOKEN = Path(".token").read_text().strip()
 
@@ -88,24 +92,16 @@ def change_btn(call: telebot.types.CallbackQuery):
     bot.send_message(chat_id, f"Изменение данных.")
 
 
-# default echo ----------------------------------------------------------------
-# @bot.message_handler(content_types=["text"])
-# def repeat_all_messages(message):
-#     bot.send_message(message.chat.id, message.text)
-
-
-def do_echo_message(message):
-    _logger().info("echo message: " + message.text)
-    bot.send_message(message.chat.id, message.text)
-
-
 def main():
 
     LoggerConfigurator.configure("INFO")
     _logger().info("start application")
 
+    # handlers
+    echo_handler = EchoHandler(bot)
+
     # register
-    bot.message_handler(content_types=["text"])(do_echo_message)
+    bot.message_handler(content_types=["text"])(echo_handler.do_echo)
 
 
 def _logger() -> logging.Logger:
