@@ -1,10 +1,22 @@
-# py_bots
+# Sysdeep telegram bot
+
+- https://t.me/sysdeep_bot
+  - реальный бот
+- https://t.me/sysdeep_debug_bot
+  - бот для разработки
+
+## TODO
+
+- [ ] webhook
+
+## Python deps
 
     pip install pytelegrambotapi
     pip install psutil
 
-https://pytba.readthedocs.io/ru/latest/quick_start.html#synchronous-telebot
+## Docs
 
+https://pytba.readthedocs.io/ru/latest/quick_start.html#synchronous-telebot
 https://www.gitbook.com/book/groosha/telegram-bot-lessons/details
 
 ## Token encrypt
