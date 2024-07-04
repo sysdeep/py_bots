@@ -40,6 +40,11 @@ openssl enc -k NIKA_HELP_PHRASE  -aes256 -base64 -d -in token.enc -out .token
 
 - admin: 319597195
 
+## Resources
+
+- https://www.cbr.ru/development/SXML/ - ресурсы для получения данных ЦБРФ
+  - https://www.cbr.ru/scripts/XML_daily.asp?date_req=02/03/2024 - котировки за день, если параметр не передать, то за последний день
+
 ## Docker
 
 build
