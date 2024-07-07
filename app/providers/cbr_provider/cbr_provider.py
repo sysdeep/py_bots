@@ -7,17 +7,6 @@ class CbrProvider:
         pass
 
     def get_valute(self):
-        """
-        <Valute ID="R01010">
-        <NumCode>036</NumCode>
-        <CharCode>AUD</CharCode>
-        <Nominal>1</Nominal>
-        <Name>Австралийский доллар</Name>
-        <Value>59,4582</Value>
-        <VunitRate>59,4582</VunitRate>
-    </Valute>
-
-        """
         url = 'https://www.cbr.ru/scripts/XML_daily.asp?date_req=02/03/2024'
 
         r = requests.get(url)
