@@ -7,6 +7,7 @@ import logging
 import telebot
 
 from app.handlers.echo_handler import EchoHandler
+from app.handlers.fin_handler import FinHandler
 from app.logger.logger_configurator import LoggerConfigurator
 from app.services.health_service.health_service import HealthService
 from app.settings.application_settings_reader import ApplicationSettingsReader
@@ -33,7 +34,7 @@ def send_welcome(message: telebot.types.Message):
 
     # button_support = telebot.types.KeyboardButton(text="Написать в поддержку")
 
-    for x in ["/start", "/health", "/admin"]:
+    for x in ["/start", "/health", "/fin", "/admin"]:
         markup.add(x)
 
     response_text = "Hello"
@@ -99,8 +100,11 @@ def main():
 
     # handlers
     echo_handler = EchoHandler(bot)
+    fin_handler = FinHandler(bot)
 
-    # register
+
+    # register 
+    bot.message_handler(commands=["fin"])(fin_handler.do_valutes)
     bot.message_handler(content_types=["text"])(echo_handler.do_echo)
 
 

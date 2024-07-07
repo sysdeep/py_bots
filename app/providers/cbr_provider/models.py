@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class Valute:
     # vid: str    # R01010, Внутренний уникальный код валюты
     name: str   # Австралийский доллар
-    value: str  # 59,3500 
+    value: float  # 59,3500 
     num_code: str   # 036, ISO Цифр. код валюты
     char_code: str  # AUD, ISO Букв. код валюты
     nominal: int    # 1, номинал. ед
