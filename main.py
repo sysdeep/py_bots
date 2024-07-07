@@ -2,12 +2,15 @@
 """
 example echo bot
 """
+import os
 import logging
+from pathlib import Path
 
 import telebot
 
 from app.handlers.echo_handler import EchoHandler
 from app.handlers.fin_handler import FinHandler
+from app.handlers.admin_handler import AdminHandler
 from app.logger.logger_configurator import LoggerConfigurator
 from app.services.health_service.health_service import HealthService
 from app.settings.application_settings_reader import ApplicationSettingsReader
@@ -60,52 +63,63 @@ def health_handler(message):
 
 
 # admin -----------------------------------------------------------------------
-@bot.message_handler(commands=["admin"])
-def admin_handler(message):
-
-    response = "this is admin page"
-
-    kbd = telebot.types.InlineKeyboardMarkup()
-    button_save = telebot.types.InlineKeyboardButton(
-        text="Сохранить", callback_data="save_data"
-    )
-    button_change = telebot.types.InlineKeyboardButton(
-        text="Изменить", callback_data="change_data"
-    )
-    kbd.add(button_save, button_change)
-
-    bot.send_message(message.chat.id, response, reply_markup=kbd)
-
-
-@bot.callback_query_handler(func=lambda call: call.data == "save_data")
-def save_btn(call: telebot.types.CallbackQuery):
-    # message = call.message
-    # chat_id = message.chat.id
-    # bot.send_message(chat_id, f'Данные сохранены', disable_notification=True)
-    bot.answer_callback_query(call.id, "Данные сохранены", show_alert=True)
-
-
-@bot.callback_query_handler(func=lambda call: call.data == "change_data")
-def change_btn(call: telebot.types.CallbackQuery):
-    message = call.message
-    chat_id = message.chat.id
-    bot.answer_callback_query(call.id, f"Изменение данных.")
-    bot.send_message(chat_id, f"Изменение данных.")
-
+# @bot.message_handler(commands=["admin"])
+# def admin_handler(message):
+#
+#     response = "this is admin page"
+#
+#     kbd = telebot.types.InlineKeyboardMarkup()
+#     button_save = telebot.types.InlineKeyboardButton(
+#         text="Сохранить", callback_data="save_data"
+#     )
+#     button_change = telebot.types.InlineKeyboardButton(
+#         text="Изменить", callback_data="change_data"
+#     )
+#     kbd.add(button_save, button_change)
+#
+#     bot.send_message(message.chat.id, response, reply_markup=kbd)
+#
+#
+# @bot.callback_query_handler(func=lambda call: call.data == "save_data")
+# def save_btn(call: telebot.types.CallbackQuery):
+#     # message = call.message
+#     # chat_id = message.chat.id
+#     # bot.send_message(chat_id, f'Данные сохранены', disable_notification=True)
+#     bot.answer_callback_query(call.id, "Данные сохранены", show_alert=True)
+#
+#
+# @bot.callback_query_handler(func=lambda call: call.data == "change_data")
+# def change_btn(call: telebot.types.CallbackQuery):
+#     message = call.message
+#     chat_id = message.chat.id
+#     bot.answer_callback_query(call.id, f"Изменение данных.")
+#     bot.send_message(chat_id, f"Изменение данных.")
+#
 
 def main():
 
     LoggerConfigurator.configure("INFO")
     _logger().info("start application")
 
+
+    self_dir = Path(os.path.realpath(__file__)).parent
+    version = _get_version(self_dir)
+    print(version)
+
     # handlers
     echo_handler = EchoHandler(bot)
     fin_handler = FinHandler(bot)
-
+    admin_handler = AdminHandler(bot, version)
 
     # register 
     bot.message_handler(commands=["fin"])(fin_handler.do_valutes)
+    bot.message_handler(commands=["admin"])(admin_handler.do_admin)
     bot.message_handler(content_types=["text"])(echo_handler.do_echo)
+
+
+def _get_version(base_dir_path: Path) -> str:
+    file_path = base_dir_path / 'Version'
+    return file_path.read_text().strip()
 
 
 def _logger() -> logging.Logger:

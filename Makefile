@@ -1,5 +1,6 @@
 token_file := .token
 token := $(shell cat ${token_file})
+version := $(shell cat Version)
 
 run:
 	TOKEN=$(token) python3 main.py
@@ -9,3 +10,6 @@ test:
 
 print_valutes:
 	PYTHONPATH=. python3 ./cmd/valutes.py
+
+build:
+	docker build . -t sysdeep_bot:$(version) 
