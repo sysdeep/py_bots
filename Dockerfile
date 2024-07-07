@@ -12,5 +12,6 @@ RUN pip install --no-cache-dir --upgrade pip \
 # app
 COPY main.py ./
 COPY app ./app/
+COPY Version ./
 
 CMD ["python3", "main.py"]
