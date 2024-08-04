@@ -8,6 +8,10 @@
 ## TODO
 
 - [ ] webhook
+- [x] health
+  - [x] uptime
+  - [x] hdd
+- [ ] отдельный сервис по накаплению данных о валютах
 
 ## Python deps
 

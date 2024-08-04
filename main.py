@@ -2,21 +2,21 @@
 """
 example echo bot
 """
-import os
 import logging
+import os
 from pathlib import Path
 
 import telebot
 
+from app.handlers.admin_handler import AdminHandler
 from app.handlers.echo_handler import EchoHandler
 from app.handlers.fin_handler import FinHandler
-from app.handlers.admin_handler import AdminHandler
+from app.handlers.health_handler import HealthHandler
 from app.logger.logger_configurator import LoggerConfigurator
 from app.services.health_service.health_service import HealthService
 from app.settings.application_settings_reader import ApplicationSettingsReader
 
 # from pathlib import Path
-
 
 
 # BOT_TOKEN = Path(".token").read_text().strip()
@@ -25,7 +25,7 @@ from app.settings.application_settings_reader import ApplicationSettingsReader
 application_settings = ApplicationSettingsReader.read_from_env()
 bot = telebot.TeleBot(application_settings.token)
 # bot = telebot.TeleBot(BOT_TOKEN)
-health_service = HealthService()
+# health_service = HealthService()
 
 
 # start -----------------------------------------------------------------------
@@ -48,18 +48,6 @@ def send_welcome(message: telebot.types.Message):
         response_text += f"\n{response_user_text}"
 
     bot.send_message(message.chat.id, response_text, reply_markup=markup)
-
-
-# healt -----------------------------------------------------------------------
-@bot.message_handler(commands=["health"])
-def health_handler(message):
-
-    health_data = health_service.get_health()
-
-    response = f"cpu count: {health_data.cpu_count}\n"
-    response += f"mem: {health_data.mem_prc}%\n"
-
-    bot.send_message(message.chat.id, response)
 
 
 # admin -----------------------------------------------------------------------
@@ -96,29 +84,34 @@ def health_handler(message):
 #     bot.send_message(chat_id, f"Изменение данных.")
 #
 
+
 def main():
 
     LoggerConfigurator.configure("INFO")
     _logger().info("start application")
 
-
     self_dir = Path(os.path.realpath(__file__)).parent
     version = _get_version(self_dir)
-    print(version)
+    _logger().info(f"version: {version}")
+
+    # services
+    health_service = HealthService()
 
     # handlers
     echo_handler = EchoHandler(bot)
     fin_handler = FinHandler(bot)
     admin_handler = AdminHandler(bot, version)
+    health_handler = HealthHandler(bot, health_service)
 
-    # register 
+    # register
     bot.message_handler(commands=["fin"])(fin_handler.do_valutes)
+    bot.message_handler(commands=["health"])(health_handler.do_main_health)
     bot.message_handler(commands=["admin"])(admin_handler.do_admin)
     bot.message_handler(content_types=["text"])(echo_handler.do_echo)
 
 
 def _get_version(base_dir_path: Path) -> str:
-    file_path = base_dir_path / 'Version'
+    file_path = base_dir_path / "Version"
     return file_path.read_text().strip()
 
 
