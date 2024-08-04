@@ -8,7 +8,7 @@ default_log_format = "%(asctime)s.%(msecs)d [%(name)s] %(levelname)s %(message)s
 class LoggerConfigurator:
 
     @classmethod
-    def configure(cls, log_level: str, log_format: str | None = None):
+    def configure(cls, log_level: str, log_format: str | None = None) -> logging.Logger:
         if not log_format:
             log_format = default_log_format
 
@@ -25,3 +25,5 @@ class LoggerConfigurator:
         for handler in logging.getLogger().handlers:
             if isinstance(handler, logging.StreamHandler):
                 handler.setFormatter(formatter)
+
+        return logging.getLogger()

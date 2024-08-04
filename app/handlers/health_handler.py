@@ -2,7 +2,8 @@ import datetime
 import logging
 
 from telebot import TeleBot
-from telebot.types import Message
+from telebot.types import (CallbackQuery, InlineKeyboardButton,
+                           InlineKeyboardMarkup, Message)
 
 from app.services.health_service.health_service import Health, HealthService
 
@@ -11,6 +12,11 @@ class HealthHandler:
     def __init__(self, bot: TeleBot, health_service: HealthService) -> None:
         self._bot = bot
         self._health_service = health_service
+
+        # register more handlers
+        self._bot.callback_query_handler(
+            func=lambda call: call.data == "show_health_procs"
+        )(self._on_show_health_procs)
 
     def do_main_health(self, message: Message):
 
@@ -21,7 +27,26 @@ class HealthHandler:
             self._logger.exception(e)
             response_text = "Error: " + str(e)
 
-        self._bot.send_message(message.chat.id, response_text)
+        # buttons
+        kbd = InlineKeyboardMarkup()
+        button_show_procs = InlineKeyboardButton(
+            text="Show procs", callback_data="show_health_procs"
+        )
+        kbd.add(
+            button_show_procs,
+            # more buttons
+        )
+
+        self._bot.send_message(message.chat.id, response_text, reply_markup=kbd)
+
+    def _on_show_health_procs(self, call: CallbackQuery):
+
+        message = call.message
+        chat_id = message.chat.id
+        self._bot.answer_callback_query(call.id, "Ответ")
+        self._bot.send_message(chat_id, "Процессы:")
+
+        # TODO: processes list
 
     @classmethod
     def format_main_health(cls, health: Health) -> str:
