@@ -1,5 +1,6 @@
 env
 .token
+fin_service/env
 
 .idea
 .vscode
