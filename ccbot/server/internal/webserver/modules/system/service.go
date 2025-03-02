@@ -2,7 +2,6 @@ package system
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"os/exec"
 )
@@ -21,49 +20,72 @@ const (
 
 // service
 type service struct {
+	services_map map[string]string
 }
 
 func newService() *service {
-	return &service{}
+
+	var services_map map[string]string = map[string]string{}
+	services_map[CODE_WIREGUARD] = "wg-quick@wg0.service"
+
+	return &service{services_map: services_map}
 }
 
-func (s *service) serviceAction(code string, action string) error {
+func (s *service) serviceAction(code string, action string) (string, error) {
 
-	// var service_name string
-	// var action string
-
-	switch code {
-	case CODE_WIREGUARD:
-		fmt.Println("wireguard")
-	default:
-		return errors.New("no code registered")
+	service_name, ok := s.services_map[code]
+	if !ok {
+		return "", errors.New("no code registered")
 	}
 
 	switch action {
 	case ACTION_START:
-		fmt.Println("start")
+		return s.doStart(service_name)
 
 	case ACTION_STOP:
-		fmt.Println("stop")
+		return s.doStop(service_name)
 
 	case ACTION_STATUS:
-		fmt.Println("sttus")
+		return s.doStatus(service_name)
 
 	case ACTION_RESTART:
-		fmt.Println("restart")
+		return s.doRestart(service_name)
 
 	default:
-		return errors.New("no action registered")
+		return "", errors.New("no action registered")
 	}
 
-	// TODO: call action
-	cmd := exec.Command("systemctl", "status", "syslog", "--output=json", "--plain", "--no-pager")
+}
+
+// TODO: при запросе статуса сервиса который остановлен возвращается - exit status 3 без самимх данных, 3 - это код возврата операции
+func (s *service) doStatus(service_name string) (string, error) {
+	slog.Info("Status for " + service_name)
+	cmd := exec.Command("systemctl", "status", service_name, "--plain", "--no-pager")
 	out, err := cmd.CombinedOutput()
-	if err != nil {
-		slog.Error(err.Error())
-	}
-	fmt.Printf("%s\n", out)
-	// TODO: get status
 
-	return nil
+	return string(out), err
+}
+
+func (s *service) doStart(service_name string) (string, error) {
+	slog.Info("Start for " + service_name)
+	cmd := exec.Command("systemctl", "start", service_name, "--plain", "--no-pager")
+	out, err := cmd.CombinedOutput()
+
+	return string(out), err
+}
+
+func (s *service) doStop(service_name string) (string, error) {
+	slog.Info("Stop for " + service_name)
+	cmd := exec.Command("systemctl", "stop", service_name, "--plain", "--no-pager")
+	out, err := cmd.CombinedOutput()
+
+	return string(out), err
+}
+
+func (s *service) doRestart(service_name string) (string, error) {
+	slog.Info("Restart for " + service_name)
+	cmd := exec.Command("systemctl", "restart", service_name, "--plain", "--no-pager")
+	out, err := cmd.CombinedOutput()
+
+	return string(out), err
 }

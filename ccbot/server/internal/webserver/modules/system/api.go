@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"nia.pro/ccbot_server/internal/webserver/core"
 )
 
 type api struct {
@@ -28,13 +27,13 @@ func (a *api) Service(c echo.Context) error {
 	code := c.Param("code")
 	action := c.Param("action")
 
-	err := a.s.serviceAction(code, action)
+	result, err := a.s.serviceAction(code, action)
 	if err != nil {
 		slog.Error(err.Error())
-		return core.MakeStdError(c, err)
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, struct{}{})
+	return c.String(http.StatusOK, result)
 }
 
 // func (a *api) Stop(c echo.Context) error {
