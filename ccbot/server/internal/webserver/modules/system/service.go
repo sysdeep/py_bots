@@ -9,6 +9,7 @@ import (
 // enums
 const (
 	CODE_WIREGUARD string = "eev3gu7A"
+	CODE_NGINX     string = "usahgaL0"
 )
 
 const (
@@ -27,6 +28,7 @@ func newService() *service {
 
 	var services_map map[string]string = map[string]string{}
 	services_map[CODE_WIREGUARD] = "wg-quick@wg0.service"
+	services_map[CODE_NGINX] = "nginx"
 
 	return &service{services_map: services_map}
 }
