@@ -1,3 +1,11 @@
+/*
+keygen - генератор пары ключей
+
+на всякий случай, можно сгенерировать средствами системы
+
+openssl genrsa -out id_rsa 4096
+openssl rsa -in id_rsa -pubout -out id_rsa.pub
+*/
 package main
 
 import (

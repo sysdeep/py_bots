@@ -1,45 +1,79 @@
 /*
+jgen - генератор jwt токена
+
+использование
+jgen -generate --key ...
+jgen -verify --key ... --token ...
+
+go run ./cmd/jgen/ --generate --key ../../../private.pem > token_pem
+go run ./cmd/jgen/ --verify --key ../../../public.pem --token ./token_pem
+
+полезные ресурсы
 - https://github.com/dgrijalva/jwt-go/blob/master/http_example_test.go
 - https://golang-jwt.github.io/jwt/usage/parse/
 */
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"os"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 func main() {
-	signBytes, err := os.ReadFile("../../../private.pem")
-	check_err(err)
 
-	signKey, err := jwt.ParseRSAPrivateKeyFromPEM(signBytes)
-	check_err(err)
+	// parse flags
+	actionGeneratePtr := flag.Bool("generate", false, "generate a new token")
+	actionVerifyPtr := flag.Bool("verify", false, "verify a token")
+	keyPtr := flag.String("key", "", "path to key")
+	tokenPtr := flag.String("token", "", "path to token")
 
-	verifyBytes, err := os.ReadFile("../../../public.pem")
-	check_err(err)
+	flag.Parse()
 
-	// TODO: тут какая то беда....
-	verifyKey, err := jwt.ParseRSAPrivateKeyFromPEM(verifyBytes)
-	check_err(err)
-	fmt.Println(verifyKey)
+	if *actionGeneratePtr {
+		if len(*keyPtr) == 0 {
+			log.Fatal("no key")
+		}
 
-	// create token
-	t := jwt.New(jwt.SigningMethodRS256)
-	token, err := t.SignedString(signKey)
-	check_err(err)
+		keyBytes, err := os.ReadFile(*keyPtr)
+		check_err(err)
 
-	fmt.Println(token)
+		token, err := createToken(keyBytes)
+		check_err(err)
+		fmt.Println(token)
+		os.Exit(0)
+	}
 
-	// // check token
-	// tt, err := jwt.ParseWithClaims(token, *&jwt.RegisteredClaims{}, func(t *jwt.Token) (interface{}, error) {
-	// 	return verifyKey, nil
-	// })
-	// check_err(err)
-	// fmt.Println(tt)
+	if *actionVerifyPtr {
+		if len(*keyPtr) == 0 {
+			log.Fatal("no key")
+		}
 
+		if len(*tokenPtr) == 0 {
+			log.Fatal("no token")
+		}
+
+		keyBytes, err := os.ReadFile(*keyPtr)
+		check_err(err)
+
+		tokenBytes, err := os.ReadFile(*tokenPtr)
+		check_err(err)
+
+		err = readToken(keyBytes, string(tokenBytes))
+		check_err(err)
+		// fmt.Println(token)
+		os.Exit(0)
+
+	}
+
+	// run_tests()
+}
+
+func run_tests() {
+	v1()
+	v2()
+	v3_dif_keys()
 }
 
 func check_err(e error) {
