@@ -12,12 +12,21 @@ from app.handlers.start_handler import StartHandler
 from app.logger.logger_configurator import LoggerConfigurator
 from app.services.health_service.health_service import HealthService
 from app.settings.application_settings_reader import ApplicationSettingsReader
+from cclient import CClient, CClientSettings
 
 
 def main():
 
     logger = LoggerConfigurator.configure("INFO")
     logger.info("start application")
+
+    # cclient
+
+    # TODO: args
+    with open("../secrets/token_rsa") as fd:
+        token = fd.read()
+    cclient = CClient(CClientSettings(
+        server="localhost:7788", token=token.rstrip()))
 
     # create bot
     application_settings = ApplicationSettingsReader.read_from_env()
@@ -34,11 +43,12 @@ def main():
     start_handler = StartHandler(bot)
     echo_handler = EchoHandler(bot)
     fin_handler = FinHandler(bot)
-    admin_handler = AdminHandler(bot, version)
+    admin_handler = AdminHandler(bot, version, cclient)
     health_handler = HealthHandler(bot, health_service)
 
     # register
-    bot.message_handler(commands=["help", "start"])(start_handler.do_send_welcome)
+    bot.message_handler(commands=["help", "start"])(
+        start_handler.do_send_welcome)
     bot.message_handler(commands=["fin"])(fin_handler.do_valutes)
     bot.message_handler(commands=["health"])(health_handler.do_main_health)
     bot.message_handler(commands=["admin"])(admin_handler.do_admin)
