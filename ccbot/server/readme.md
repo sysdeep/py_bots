@@ -7,6 +7,7 @@
 - https://dev.to/elioenaiferrari/asymmetric-cryptography-with-golang-2ffd
 - https://pycryptodome.readthedocs.io/en/latest/src/examples.html#encrypt-data-with-rsa
 - https://www.inanzzz.com/index.php/post/kdl9/creating-and-validating-a-jwt-rsa-token-in-golang
+- https://echo.labstack.com/docs/cookbook/jwt
 
 ## Keygen
 

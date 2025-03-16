@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log/slog"
 	"net/http"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"nia.pro/ccbot_server/internal/token"
 	"nia.pro/ccbot_server/internal/webserver"
 )
 
@@ -19,9 +21,34 @@ const (
 func main() {
 	slog.Info("start app")
 
+	privateKeyPtr := flag.String("private-key", "", "path to private key")
+	publicKeyPtr := flag.String("public-key", "", "path to public key")
+
+	flag.Parse()
+
+	if len(*privateKeyPtr) == 0 {
+		slog.Error("no private key specifed")
+		os.Exit(1)
+	}
+
+	if len(*publicKeyPtr) == 0 {
+		slog.Error("no public key specifed")
+		os.Exit(1)
+	}
+
+	// token manager ----------------------------------------------------------
+	privateKeyBytes, err := os.ReadFile(*privateKeyPtr)
+	check_err(err)
+
+	publicKeyBytes, err := os.ReadFile(*publicKeyPtr)
+	check_err(err)
+
+	token_manager, err := token.New(privateKeyBytes, publicKeyBytes)
+	check_err(err)
+
 	// webserver --------------------------------------------------------------
 	ws_config := webserver.WebserverConfig{Host: "0.0.0.0", Port: 7788}
-	ws := webserver.New(ws_config)
+	ws := webserver.New(ws_config, token_manager)
 
 	go func() {
 		err := ws.Start()
@@ -52,4 +79,11 @@ func main() {
 
 	slog.Info("finished")
 	os.Exit(0)
+}
+
+func check_err(err error) {
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
 }

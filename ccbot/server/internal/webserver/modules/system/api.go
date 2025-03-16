@@ -5,15 +5,20 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"nia.pro/ccbot_server/internal/token"
 )
 
 type api struct {
-	s *service
+	s      *service
+	tokenM *token.TokenManager
 }
 
-func newApi(e *echo.Group, s *service) *api {
+func newApi(e *echo.Group, s *service, tokenM *token.TokenManager) *api {
 
-	a := &api{s}
+	a := &api{
+		s:      s,
+		tokenM: tokenM,
+	}
 
 	e.GET("/service/:code/:action", a.Service)
 	// e.GET("/stop", a.Stop)
@@ -24,6 +29,11 @@ func newApi(e *echo.Group, s *service) *api {
 }
 
 func (a *api) Service(c echo.Context) error {
+
+	// NOTE: see https://echo.labstack.com/docs/cookbook/jwt
+	// token := c.Get("user").(*jwt.Token)
+	// fmt.Println(a.tokenM.ReadClaims(token))
+
 	code := c.Param("code")
 	action := c.Param("action")
 
