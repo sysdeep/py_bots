@@ -21,6 +21,10 @@ class CClient:
     def __init__(self, settings: CClientSettings):
         self._settings = settings
 
+    @property
+    def settings(self) -> CClientSettings:
+        return self._settings
+
     def service(self, service_name: Service, action: Action) -> str:
 
         url = f"http://{self._settings.server}/api/system/service/{service_name.value}/{action.value}"
@@ -37,6 +41,6 @@ if __name__ == "__main__":
     with open("../secrets/token_rsa") as fd:
         token = fd.read()
 
-    c = CClient(CClientSettings(server="localhost:7788", token=token.rstrip()))
+    c = CClient(CClientSettings(server="localhost:7788", token=token.rstrip(), name="test"))
     r = c.service(Service.nginx, Action.status)
     print(r)

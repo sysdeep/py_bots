@@ -3,7 +3,7 @@ token := $(shell cat ${token_file})
 version := $(shell cat Version)
 
 run:
-	TOKEN=$(token) python3 main.py
+	TOKEN=$(token) python3 main.py --config ../config.toml
 
 test:
 	PYTHONPATH=. pytest ./tests/ -vs
