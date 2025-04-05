@@ -5,6 +5,8 @@ from telebot.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMar
 
 from cclient import CClient, Service, Action
 
+from .vps_group import VPSGroup
+
 
 # TODO: необходимо расширить менюшку, появился самостоятельный раздел с VPS
 # TODO: что то типа StateMachine
@@ -14,6 +16,8 @@ class AdminHandler:
         self._version = version
         self._cclients = cclients
         self._cclient = self._cclients[0]  # tests
+
+        self._vps_group = VPSGroup(bot, cclients=cclients, go_parent_handler=self.do_admin)
 
         self._kbd: InlineKeyboardMarkup = self._make_kbd()
 
@@ -27,6 +31,8 @@ class AdminHandler:
         self._bot.callback_query_handler(func=lambda call: call.data == "stop_wireguard")(self._on_stop_wireguard)
 
         self._bot.callback_query_handler(func=lambda call: call.data == "start_wireguard")(self._on_start_wireguard)
+
+        self._bot.callback_query_handler(func=lambda call: call.data == "admin:go_vps")(self._vps_group.start)
 
     def do_admin(self, message: Message):
 
@@ -112,9 +118,9 @@ class AdminHandler:
     @classmethod
     def _make_kbd(cls) -> InlineKeyboardMarkup:
         kbd = InlineKeyboardMarkup()
-        button_show_procs = InlineKeyboardButton(text="Show nginx", callback_data="show_nginx_status")
         kbd.add(
-            button_show_procs,
+            InlineKeyboardButton(text="VPS", callback_data="admin:go_vps"),
+            InlineKeyboardButton(text="Show nginx", callback_data="show_nginx_status"),
             # more buttons
             InlineKeyboardButton(text="Show wireguard", callback_data="show_wireguard_status"),
             InlineKeyboardButton(text="Stop wireguard", callback_data="stop_wireguard_status"),
