@@ -1,133 +1,53 @@
 import logging
 
-from telebot import TeleBot
+from telebot import TeleBot, formatting
 from telebot.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-from cclient import CClient, Service, Action
+from cclient import CClient
 
 from .vps_group import VPSGroup
 
 
-# TODO: необходимо расширить менюшку, появился самостоятельный раздел с VPS
-# TODO: что то типа StateMachine
 class AdminHandler:
+    """обработчик админки"""
+
+    route_main = "admin:main"
+
     def __init__(self, bot: TeleBot, version: str, cclients: list[CClient]):
         self._bot = bot
         self._version = version
         self._cclients = cclients
         self._cclient = self._cclients[0]  # tests
 
-        self._vps_group = VPSGroup(bot, cclients=cclients, go_parent_handler=self.do_admin)
-
-        self._kbd: InlineKeyboardMarkup = self._make_kbd()
+        self._vps_group = VPSGroup(bot, cclients=cclients, parent_route=self.route_main)
 
         # register more handlers
-        self._bot.callback_query_handler(func=lambda call: call.data == "show_nginx_status")(self._on_show_nginx_status)
-
-        self._bot.callback_query_handler(func=lambda call: call.data == "show_wireguard_status")(
-            self._on_show_wireguard_status
-        )
-
-        self._bot.callback_query_handler(func=lambda call: call.data == "stop_wireguard")(self._on_stop_wireguard)
-
-        self._bot.callback_query_handler(func=lambda call: call.data == "start_wireguard")(self._on_start_wireguard)
-
-        self._bot.callback_query_handler(func=lambda call: call.data == "admin:go_vps")(self._vps_group.start)
+        self._bot.callback_query_handler(func=lambda call: call.data == self.route_main)(self._on_route_main)
+        self._bot.callback_query_handler(func=lambda call: call.data == VPSGroup.route_vps_main)(self._vps_group.start)
 
     def do_admin(self, message: Message):
-
-        resp_text = self._make_header("Админка - главная")
-
-        resp_text += "\n"
-
-        resp_text += "VPS:\n"
-        for cclient in self._cclients:
-            resp_text += f"{cclient.settings.name}\n"
-
-        resp_text += "\n"
-        self._send_response(message.chat.id, resp_text)
-
-    def _on_show_nginx_status(self, call: CallbackQuery):
-
-        result_text = self._make_header("Nginx status")
-
-        try:
-            result_text += self._cclient.service(Service.nginx, Action.status)
-        except Exception as e:
-            result_text += str(e)
-
-        message = call.message
-        chat_id = message.chat.id
-        self._bot.answer_callback_query(call.id, "Ответ")
-        # self._bot.send_message(chat_id, result_text, reply_markup=self._kbd)
-        self._send_response(chat_id, result_text)
-
-    def _on_show_wireguard_status(self, call: CallbackQuery):
-
-        try:
-            result_text = self._cclient.service(Service.wireguard, Action.status)
-        except Exception as e:
-            result_text = str(e)
-
-        message = call.message
-        chat_id = message.chat.id
-        self._bot.answer_callback_query(call.id, "Ответ")
-        # self._bot.send_message(chat_id, result_text, reply_markup=self._kbd)
-        self._send_response(chat_id, result_text)
-
-    def _on_stop_wireguard(self, call: CallbackQuery):
-
-        try:
-            result_text = self._cclient.service(Service.wireguard, Action.stop)
-        except Exception as e:
-            result_text = str(e)
-
-        message = call.message
-        chat_id = message.chat.id
-        self._bot.answer_callback_query(call.id, "Ответ")
-        # self._bot.send_message(chat_id, result_text, reply_markup=self._kbd)
-        self._send_response(chat_id, result_text)
-
-    def _on_start_wireguard(self, call: CallbackQuery):
-
-        try:
-            result_text = self._cclient.service(Service.wireguard, Action.start)
-        except Exception as e:
-            result_text = str(e)
-
-        message = call.message
-        chat_id = message.chat.id
-        self._bot.answer_callback_query(call.id, "Ответ")
-        # self._bot.send_message(chat_id, result_text, reply_markup=self._kbd)
-        self._send_response(chat_id, result_text)
-
-    def _send_response(self, chat_id, text: str):
-
-        result_text = text + "\n"
-        result_text += "-" * 20 + "\n"
-        result_text += f"Version: {self._version}"
-
-        self._bot.send_message(chat_id, result_text, reply_markup=self._kbd)
-
-    def _make_header(self, text: str) -> str:
-        return "\n".join([text, self._make_dash(), ""])
-
-    def _make_dash(self) -> str:
-        return "-" * 20
-
-    @classmethod
-    def _make_kbd(cls) -> InlineKeyboardMarkup:
-        kbd = InlineKeyboardMarkup()
-        kbd.add(
-            InlineKeyboardButton(text="VPS", callback_data="admin:go_vps"),
-            InlineKeyboardButton(text="Show nginx", callback_data="show_nginx_status"),
-            # more buttons
-            InlineKeyboardButton(text="Show wireguard", callback_data="show_wireguard_status"),
-            InlineKeyboardButton(text="Stop wireguard", callback_data="stop_wireguard_status"),
-            InlineKeyboardButton(text="Start wireguard", callback_data="start_wireguard_status"),
+        """отобразить главный экран"""
+        result_text = formatting.format_text(
+            formatting.mbold("Админка - главная"),
+            "",
+            formatting.escape_markdown(f"Версия: {self._version}"),
+            formatting.escape_markdown(f"User: {message.from_user.username}({message.from_user.id})"),
         )
 
-        return kbd
+        # kbd
+        kbd = InlineKeyboardMarkup()
+        kbd.add(InlineKeyboardButton(text="VPS", callback_data=VPSGroup.route_vps_main))
+
+        self._bot.send_message(
+            message.chat.id,
+            result_text,
+            parse_mode="MarkdownV2",
+            reply_markup=kbd,
+        )
+
+    def _on_route_main(self, call: CallbackQuery):
+        self._bot.answer_callback_query(call.id, "")
+        self.do_admin(call.message)
 
     @property
     def _logger(self) -> logging.Logger:

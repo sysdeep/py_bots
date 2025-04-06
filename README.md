@@ -23,6 +23,10 @@
 https://pytba.readthedocs.io/ru/latest/quick_start.html#synchronous-telebot
 https://www.gitbook.com/book/groosha/telegram-bot-lessons/details
 
+### Telebot
+
+- https://github.com/eternnoir/pyTelegramBotAPI/blob/master/examples/formatting_example.py
+
 ## Token encrypt
 
 Токен хранится в зашифрованном виде в файле token.enc
